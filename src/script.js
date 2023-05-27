@@ -35,7 +35,7 @@ const scene = new THREE.Scene();
 scene.rotateY((2 * Math.PI) / 5);
 
 // Lights
-const light = new THREE.DirectionalLight(0xffffff, 1);
+const light = new THREE.DirectionalLight(0xffffff, 4);
 light.position.set(0.25, 2, -2.25);
 light.castShadow = true;
 light.shadow.camera.far = 15;
@@ -104,12 +104,12 @@ function updateModelTransform() {
       modelControls.rotationY,
       modelControls.rotationZ,
     );
-    airplaneModel.translateZ(modelControls.positionZ);
-    // airplaneModel.position.set(
-    //   modelControls.positionX,
-    //   modelControls.positionY,
-    //   modelControls.positionZ,
-    // );
+    // airplaneModel.translateZ(modelControls.positionZ);
+    airplaneModel.position.set(
+      modelControls.positionX,
+      modelControls.positionY,
+      modelControls.positionZ,
+    );
     // airplaneModel.position.set(
     //   modelControls.positionX +
     //     modelControls.positionZ * Math.sin(modelControls.rotationY),
@@ -178,6 +178,7 @@ window.addEventListener("mousemove", (event) => {
 // Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  antialias: true,
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
