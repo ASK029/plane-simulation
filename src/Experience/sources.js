@@ -14,11 +14,6 @@ export default [
   {
     name: "airplaneModel",
     type: "gltfModel",
-    path: "models/myAirplane2.glb",
-  },
-  {
-    name: "draco",
-    type: "draco",
-    path: "/draco/",
+    path: "/models/myAirplane2.glb",
   },
 ];
