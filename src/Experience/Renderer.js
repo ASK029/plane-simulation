@@ -21,7 +21,6 @@ export default class Renderer
         this.instance.setPixelRatio(this.sizes.pixelRatio)
         this.instance.setClearColor('#211d20')
         this.instance.physicallyCorrectLights = true
-        console.log(this.instance);
     }
 
     resize()
