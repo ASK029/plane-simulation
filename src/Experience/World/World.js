@@ -1,8 +1,7 @@
-import * as THREE from "three";
-import Experience from "../Experience";
-import Environment from "./Environment";
-import Floor from "./Floor";
-import Airplane from "./Airplane";
+import Experience from "../Experience"
+import Environment from "./Environment"
+import Floor from "./Floor"
+import Aeroplane from "./Aeroplane";
 
 export default class World {
   constructor() {
@@ -10,21 +9,13 @@ export default class World {
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
 
-    const testMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial(),
-    );
-    this.scene.add(testMesh);
-
+  
     //wait for resources
-    this.resources.on("ready", () => {
+    this.resources.on("loaded", () => {
       //Setup
-      this.floor = new Floor();
-      this.airplane = new Airplane();
-      this.environment = new Environment();
-    });
-
-    //Setup
-    this.environment = new Environment();
+      this.floor = new Floor()
+      this.aeroplane = new Aeroplane()
+      this.environment = new Environment()
+    })
   }
 }
