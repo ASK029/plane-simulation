@@ -12,8 +12,18 @@ export default [
     ],
   },
   {
+    name: "roadColorTexture",
+    type: "texture",
+    path: "textures/1/black-road-texture.jpg",
+  },
+  {
+    name: "roadNormalTexture",
+    type: "texture",
+    path: "textures/1/black-road-texture-normal.jpg",
+  },
+  {
     name: "airplaneModel",
     type: "gltfModel",
     path: "models/myAirplane2.glb",
-  }
+  },
 ];
