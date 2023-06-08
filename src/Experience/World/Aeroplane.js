@@ -1,10 +1,12 @@
 import { Vector3 } from "three";
 import Experience from "../Experience";
+import EventEmitter from "../Utils/EventEmitter";
 
 export default class Aeroplane {
   constructor() {
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.time = this.experience.Time;
     this.resources = this.experience.resources;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
@@ -16,12 +18,13 @@ export default class Aeroplane {
     //setup
     this.resource = this.resources.items.airplaneModel;
     this.model = this.resource.scene;
+    this.setDebug();
     this.setModel();
   }
 
   setModel() {
     this.model.position.y = 3;
-    this.setDebug();
+    this.setMovement();
     this.camera.setInstance(
       this.model.position.x,
       this.model.position.y,
@@ -31,23 +34,72 @@ export default class Aeroplane {
     this.scene.add(this.model);
   }
 
-  setDebug() {
+  setMovement() {
+    let x = 0,
+      y = 0,
+      z = 0,
+      rotateX = 0,
+      rotateY = 0,
+      rotateZ = 0;
+    let speed = 0;
+    let isMoveing = false;
     const debugObject = {
       moveForword: () => {
-        const direction = new Vector3(0, 0, 100);
-        const speed = 0.01;
-        this.model.position.add(direction.multiplyScalar(speed));
+        speed += 0.01;
+        this.model.translateZ(speed);
+        // z = 100;
+      },
+      moveSides: (side) => {
+        if (side === "R") {
+          rotateY += -Math.PI / 100;
+          rotateZ += Math.PI / 100;
+        } else if (side === "L") {
+          // x = 100;
+          rotateY += Math.PI / 100;
+          rotateZ += -Math.PI / 100;
+        }
+        this.model.rotateY(rotateY);
+        this.model.rotateZ(rotateZ);
+      },
+      moveUp: () => {
+        rotateX += -Math.PI / 100;
+        this.model.rotateX(rotateX);
+      },
+      moveDown: () => {
+        rotateX += Math.PI / 100;
+        this.model.rotateX(rotateX);
       },
     };
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
-        case "ArrowUp":
-          debugObject.moveForword();
+        case " ":
+          isMoveing ? (isMoveing = false) : (isMoveing = true);
+          break;
+        case "d":
+          debugObject.moveSides("R");
+          break;
+        case "a":
+          debugObject.moveSides("L");
+          break;
+        case "w":
+          debugObject.moveUp();
+          break;
+        case "s":
+          debugObject.moveDown();
           break;
       }
+      // console.log(this.model.position);
     });
+
+    this.time.on("tick", () => {
+      if (isMoveing) debugObject.moveForword();
+    });
+    speed = 0.01;
+  }
+
+  setDebug() {
     if (this.debug.active) {
-      this.debugFolder.add(debugObject, "moveForword");
+      // this.debugFolder.add(debugObject, "moveForword");
       this.debugFolder.add(this.model.position, "x", -50, 50, 0.01);
       this.debugFolder.add(this.model.position, "y", 0, 100, 0.01);
       this.debugFolder.add(this.model.position, "z", 0, 100, 0.01);
