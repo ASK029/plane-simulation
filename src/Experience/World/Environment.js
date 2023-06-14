@@ -10,7 +10,6 @@ export default class Environment {
     this.aeroplane = this.experience.world.aeroplane;
 
     this.setSunLight();
-    this.setFog();
     this.setEnvironmentMap();
   }
 
@@ -20,10 +19,6 @@ export default class Environment {
     this.sunLight.castShadow = true;
     this.sunLight.shadow.camera.far = 15;
     this.scene.add(this.sunLight);
-  }
-
-  setFog() {
-    let fogDensity = 0;
   }
 
   setEnvironmentMap() {

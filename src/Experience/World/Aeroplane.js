@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 import Experience from "../Experience";
-import EventEmitter from "../Utils/EventEmitter";
+import EnvironmentPhysics from "../Utils/Physics/EnvironmentPhysics";
 
 export default class Aeroplane {
   constructor() {
@@ -9,6 +9,7 @@ export default class Aeroplane {
     this.time = this.experience.Time;
     this.resources = this.experience.resources;
     this.camera = this.experience.camera;
+    this.physics = new EnvironmentPhysics();
     this.debug = this.experience.debug;
 
     if (this.debug.active) {
@@ -47,6 +48,7 @@ export default class Aeroplane {
       moveForword: () => {
         speed += 0.01;
         this.model.translateZ(speed);
+
         // z = 100;
       },
       moveSides: (side) => {
@@ -91,8 +93,11 @@ export default class Aeroplane {
       // console.log(this.model.position);
     });
 
+    var p;
     this.time.on("tick", () => {
+      p = this.model.position.clone();
       if (isMoveing) debugObject.moveForword();
+      console.log(this.model.position, p.normalize());
     });
     speed = 0.01;
   }
