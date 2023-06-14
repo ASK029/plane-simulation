@@ -1,7 +1,8 @@
 export default class AirplaneStatics {
   constructor() {
-    this.fuselageRadius = 74; //m
-    this.wingsArea = 124.583; //m^2
-    this.verticalStabilizerArea = 32.77619; //m^2
+    this.fuselageRadius = 1.8796; //m
+    this.wingArea = 125.0; //m^2
+    this.dragCoefficient = 0.0355;
+    this.liftCoefficient = 0.355;
   }
 }

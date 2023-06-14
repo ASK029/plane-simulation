@@ -8,9 +8,10 @@ export default class EnvironmentPhysics {
   }
 
   gravityAcceleration() {
-    let iHeight = this.earthRedius * this.earthRedius;
-
-    return (this.gravitationalConstant * this.earthMass) / iHeight;
+    return (
+      (this.gravitationalConstant * this.earthMass) /
+      Math.pow(this.earthRedius, 2)
+    );
   }
 
   atm_pressure(height) {

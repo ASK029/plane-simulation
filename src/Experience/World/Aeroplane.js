@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import Experience from "../Experience";
 import EnvironmentPhysics from "../Utils/Physics/EnvironmentPhysics";
+import Forces from "../Utils/Physics/Forces";
 
 export default class Aeroplane {
   constructor() {
@@ -93,11 +94,10 @@ export default class Aeroplane {
       // console.log(this.model.position);
     });
 
-    var p;
+    let forces = new Forces();
     this.time.on("tick", () => {
-      p = this.model.position.clone();
-      if (isMoveing) debugObject.moveForword();
-      console.log(this.model.position, p.normalize());
+      forces.update(0.009, this.model.position, 10000);
+      console.log(this.model.position);
     });
     speed = 0.01;
   }

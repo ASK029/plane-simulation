@@ -1,3 +1,4 @@
+import { Vector3 } from "three";
 import AirplaneStatics from "./AirplaneStatics";
 import EnvironmentPhysics from "./EnvironmentPhysics";
 
@@ -5,19 +6,59 @@ export default class Forces {
   constructor() {
     this.envPhysics = new EnvironmentPhysics();
     this.statics = new AirplaneStatics();
+    this.vilocity = new Vector3(0, 0, 0);
   }
 
   weight(mass) {
     return new Vector3(0, -1 * mass * this.envPhysics.gravityAcceleration(), 0);
   }
 
-  drag(height) {
-    // R = 1/2 * Cd * rho * A * V^2
-    let vilocitySquared;
-    let A = Math.PI * Math.pow(this.statics.fuselageRadius, 2);
+  drag(position) {
+    // D = 1/2 * Cd * rho * A * V^2
+    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let A = Math.PI * Math.pow(this.statics.fuselageRadius, 2); // frontal area
     let Cd = this.statics.dragCoefficient;
-    let rho = this.envPhysics.air_rho(height);
+    let rho = this.envPhysics.air_rho(position.y);
 
-    let dx = -0.5 * Cd * rho * A * vilocitySquared;
+    let dx = -0.5 * Cd * rho * A * vilocitySquared.x;
+    let dy = -0.5 * Cd * rho * A * vilocitySquared.y;
+    let dz = -0.5 * Cd * rho * A * vilocitySquared.z;
+
+    return new Vector3(dx, dy, dz);
+  }
+
+  thrust() {}
+
+  lift(position) {
+    //L = 1/2 * Cl * rho * A * V^2
+    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let A = this.statics.wingArea;
+    let Cl = this.statics.liftCoefficient;
+    let rho = this.envPhysics.air_rho(position.y);
+
+    let dx = 0.5 * Cl * rho * A * vilocitySquared.x;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared.y;
+    let dz = 0.5 * Cl * rho * A * vilocitySquared.z;
+
+    return new Vector3(dx, dy, dz);
+  }
+
+  totalForces(dTime, mass, position) {
+    return (
+      new Vector3()
+        .add(this.weight(mass))
+        .add(this.drag(position))
+        // .add(this.thrust())
+        .add(this.lift(position))
+    );
+  }
+
+  update(dTime, position, mass) {
+    let acceleration = this.totalForces(dTime, mass, position)
+      .clone()
+      .divideScalar(mass);
+
+    this.vilocity.add(acceleration).multiplyScalar(dTime);
+    position.add(this.vilocity).multiplyScalar(dTime);
   }
 }
