@@ -18,7 +18,7 @@ export default class Forces {
     let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
     let A = Math.PI * Math.pow(this.statics.fuselageRadius, 2); // frontal area
     let Cd = this.statics.dragCoefficient;
-    let rho = this.envPhysics.air_rho(position.y);
+    let rho = this.envPhysics.air_rho(position.y - 3);
 
     let dx = -0.5 * Cd * rho * A * vilocitySquared.x;
     let dy = -0.5 * Cd * rho * A * vilocitySquared.y;
@@ -34,7 +34,7 @@ export default class Forces {
     let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
-    let rho = this.envPhysics.air_rho(position.y);
+    let rho = this.envPhysics.air_rho(position.y - 3);
 
     let dx = 0.5 * Cl * rho * A * vilocitySquared.x;
     let dy = 0.5 * Cl * rho * A * vilocitySquared.y;
@@ -43,7 +43,7 @@ export default class Forces {
     return new Vector3(dx, dy, dz);
   }
 
-  totalForces(dTime, mass, position) {
+  totalForces(mass, position) {
     return (
       new Vector3()
         .add(this.weight(mass))
@@ -54,10 +54,11 @@ export default class Forces {
   }
 
   update(dTime, position, mass) {
-    let acceleration = this.totalForces(dTime, mass, position)
+    let acceleration = this.totalForces(mass, position)
       .clone()
       .divideScalar(mass);
 
+    if (position.y <= 0) this.vilocity.y = 0;
     this.vilocity.add(acceleration).multiplyScalar(dTime);
     position.add(this.vilocity).multiplyScalar(dTime);
   }

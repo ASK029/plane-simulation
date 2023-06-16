@@ -25,7 +25,7 @@ export default class Aeroplane {
   }
 
   setModel() {
-    this.model.position.y = 3;
+    // this.model.position.y = 3;
     this.setMovement();
     this.camera.setInstance(
       this.model.position.x,
@@ -95,8 +95,12 @@ export default class Aeroplane {
     });
 
     let forces = new Forces();
+    // this.model.position.y = 100;
     this.time.on("tick", () => {
-      forces.update(0.009, this.model.position, 10000);
+      if (isMoveing) {
+        // debugObject.moveForword();
+        forces.update(0.005, this.model.position, 10000);
+      }
       console.log(this.model.position);
     });
     speed = 0.01;
