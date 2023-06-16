@@ -27,15 +27,13 @@ export default class EnvironmentPhysics {
   }
 
   //Pe
-  pressure_e(height)
-  {
+  pressure_e(height) {
     let y = 1.4;
     let Pt = this.atm_pressure(height);
-    let base = 1 + ((y-1)/2);
-    let exponent = -y/(y-1);
-    let Pe = Pt * Math.pow(base,exponent);
-    return Pe;
-  } 
+    let base = 1 + (y - 1) / 2;
+    let exponent = -y / (y - 1);
+    return Pt * Math.pow(base, exponent);
+  }
 
   //Tt
   temperature(height) {
@@ -45,33 +43,29 @@ export default class EnvironmentPhysics {
   }
 
   //Te
-  temperature_e(height)
-  {
+  temperature_e(height) {
     let y = 1.4;
     let Tt = this.temperature(height);
-    let Te = Tt / ( 1 + ((y-1)/2))
-    return Te;
+    return Tt / (1 + (y - 1) / 2);
   }
 
   air_rho(height) {
     let Rspecific = 287.058; //specific gas constant for dry air
     let Tt = this.temperature(height);
     let P = this.atm_pressure(height);
-    let rho = P / (Rspecific * Tt);
-    return rho;
+    return P / (Rspecific * Tt);
   }
 
-  m_dot()
-  {
+  m_dot(height) {
     let R = 8.3145;
     let y = 1.4;
     let A = 1;
     let Pt = this.atm_pressure();
     let Tt = this.temperature(height);
-    let exponent = (y+1)/(2*y-2);
-    let base = (y+1)/2;
-    let mdot = ((A*Pt)/Math.sqrt(Tt)) * Math.sqrt(y/R) * Math.pow(base,exponent);
-    return mdot;
+    let exponent = (y + 1) / (2 * y - 2);
+    let base = (y + 1) / 2;
+    return (
+      ((A * Pt) / Math.sqrt(Tt)) * Math.sqrt(y / R) * Math.pow(base, exponent)
+    );
   }
-
 }

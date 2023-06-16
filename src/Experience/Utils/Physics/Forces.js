@@ -28,19 +28,20 @@ export default class Forces {
   }
 
   thrust(position) {
+    // T = mdot * Ve + (pe - pt) * Ae
     let Ae = 1; //unknown..
-    let y =1.4;
+    let y = 1.4;
     let R = 8.3145;
     let Te = this.envPhysics.temperature_e(position.y);
-    let mdot = this.envPhysics.m_dot();
-    let Pt  = this.envPhysics.atm_pressure(position.y);
+    let mdot = this.envPhysics.m_dot(position.y);
+    let Pt = this.envPhysics.atm_pressure(position.y);
     let Pe = this.envPhysics.pressure_e(position.y);
-    let Ve = sqrt(y*R*Te);
-    let T = mdot *Ve + (Pe - Pt)* Ae;
+    let Ve = sqrt(y * R * Te);
+    let T = mdot * Ve + (Pe - Pt) * Ae;
   }
 
   lift(position) {
-    //L = 1/2 * Cl * rho * A * V^2
+    // L = 1/2 * Cl * rho * A * V^2
     let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
@@ -54,13 +55,11 @@ export default class Forces {
   }
 
   totalForces(mass, position) {
-    return (
-      new Vector3()
-        .add(this.weight(mass))
-        .add(this.drag(position))
-        // .add(this.thrust())
-        .add(this.lift(position))
-    );
+    return new Vector3()
+      .add(this.weight(mass))
+      .add(this.drag(position))
+      .add(this.thrust(position))
+      .add(this.lift(position));
   }
 
   update(dTime, position, mass) {
