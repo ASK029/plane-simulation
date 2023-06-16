@@ -27,7 +27,17 @@ export default class Forces {
     return new Vector3(dx, dy, dz);
   }
 
-  thrust() {}
+  thrust(position) {
+    let Ae = 1; //unknown..
+    let y =1.4;
+    let R = 8.3145;
+    let Te = this.envPhysics.temperature_e(position.y);
+    let mdot = this.envPhysics.m_dot();
+    let Pt  = this.envPhysics.atm_pressure(position.y);
+    let Pe = this.envPhysics.pressure_e(position.y);
+    let Ve = sqrt(y*R*Te);
+    let T = mdot *Ve + (Pe - Pt)* Ae;
+  }
 
   lift(position) {
     //L = 1/2 * Cl * rho * A * V^2

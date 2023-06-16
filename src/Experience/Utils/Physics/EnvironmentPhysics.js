@@ -14,6 +14,7 @@ export default class EnvironmentPhysics {
     );
   }
 
+  //Pt
   atm_pressure(height) {
     let R = 8.3145;
     let Md = 0.0289644; // (kg/mol) mass of u air molecule
@@ -25,10 +26,31 @@ export default class EnvironmentPhysics {
     return P0 * Math.pow(base, exponent);
   }
 
+  //Pe
+  pressure_e(height)
+  {
+    let y = 1.4;
+    let Pt = this.atm_pressure(height);
+    let base = 1 + ((y-1)/2);
+    let exponent = -y/(y-1);
+    let Pe = Pt * Math.pow(base,exponent);
+    return Pe;
+  } 
+
+  //Tt
   temperature(height) {
     let Tb = 288.15; //[kelvin]
     let Lb = -0.0065; //[kelvin/m]
     return Tb - Lb * height;
+  }
+
+  //Te
+  temperature_e(height)
+  {
+    let y = 1.4;
+    let Tt = this.temperature(height);
+    let Te = Tt / ( 1 + ((y-1)/2))
+    return Te;
   }
 
   air_rho(height) {
@@ -38,4 +60,18 @@ export default class EnvironmentPhysics {
     let rho = P / (Rspecific * Tt);
     return rho;
   }
+
+  m_dot()
+  {
+    let R = 8.3145;
+    let y = 1.4;
+    let A = 1;
+    let Pt = this.atm_pressure();
+    let Tt = this.temperature(height);
+    let exponent = (y+1)/(2*y-2);
+    let base = (y+1)/2;
+    let mdot = ((A*Pt)/Math.sqrt(Tt)) * Math.sqrt(y/R) * Math.pow(base,exponent);
+    return mdot;
+  }
+
 }
