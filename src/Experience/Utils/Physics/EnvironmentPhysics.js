@@ -60,7 +60,7 @@ export default class EnvironmentPhysics {
     let R = 8.3145;
     let y = 1.4;
     let A = 1;
-    let Pt = this.atm_pressure();
+    let Pt = this.atm_pressure(height);
     let Tt = this.temperature(height);
     let exponent = (y + 1) / (2 * y - 2);
     let base = (y + 1) / 2;
