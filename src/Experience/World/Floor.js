@@ -14,7 +14,7 @@ export default class Floor {
   }
 
   setGeometry() {
-    this.geometry = new THREE.PlaneGeometry(56.16, 374.4);
+    this.geometry = new THREE.PlaneGeometry(56.16, 37440);
   }
 
   setTexture() {
@@ -22,7 +22,7 @@ export default class Floor {
 
     this.textures.color = this.resources.items.roadColorTexture;
     this.textures.color.encoding = THREE.sRGBEncoding;
-    this.textures.color.repeat.set(1, 10);
+    this.textures.color.repeat.set(1, 1000);
     this.textures.color.wrapS = THREE.RepeatWrapping;
     this.textures.color.wrapT = THREE.RepeatWrapping;
 

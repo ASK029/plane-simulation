@@ -99,9 +99,9 @@ export default class Aeroplane {
     this.time.on("tick", () => {
       if (isMoveing) {
         // debugObject.moveForword();
-        this.forces.update(0.009, this.model.position, 10000);
+        this.forces.update(0.009, this.model.position, 1000);
       }
-      console.log(this.model.position);
+      // console.log(this.model.position);
       // console.log(this.model.position);
     });
     speed = 0.01;
@@ -111,7 +111,7 @@ export default class Aeroplane {
     if (this.debug.active) {
       // this.debugFolder.add(debugObject, "moveForword");
       this.debugFolder.add(this.model.position, "x", -50, 50, 0.01);
-      this.debugFolder.add(this.model.position, "y", 0, 100, 0.01);
+      this.debugFolder.add(this.model.position, "y", 0, 1000, 0.01);
       this.debugFolder.add(this.model.position, "z", 0, 100, 0.01);
     }
   }

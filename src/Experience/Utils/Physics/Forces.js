@@ -20,15 +20,15 @@ export default class Forces {
   drag(position) {
     // D = 1/2 * Cd * rho * A * V^2
     let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
-    let A = Math.PI * Math.pow(this.statics.fuselageRadius, 2); // frontal area
+    let A =
+      Math.PI * Math.pow(this.statics.fuselageRadius, 2) +
+      this.statics.vWingsArea; // frontal area
     let Cd = this.statics.dragCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
 
-    let dx = -0.5 * Cd * rho * A * vilocitySquared.x;
-    let dy = -0.5 * Cd * rho * A * vilocitySquared.y;
     let dz = -0.5 * Cd * rho * A * vilocitySquared.z;
 
-    return new Vector3(dx, dy, dz);
+    return new Vector3(0, 0, dz);
   }
 
   thrust(position) {
@@ -53,11 +53,9 @@ export default class Forces {
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
 
-    let dx = 0.5 * Cl * rho * A * vilocitySquared.x;
-    let dy = 0.5 * Cl * rho * A * vilocitySquared.y;
-    let dz = 0.5 * Cl * rho * A * vilocitySquared.z;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared.length();
 
-    return new Vector3(dx, dy, dz);
+    return new Vector3(0, dy, 0);
   }
 
   totalForces(mass, position) {
@@ -72,16 +70,19 @@ export default class Forces {
     let acceleration = this.totalForces(mass, position)
       .clone()
       .divideScalar(mass);
-    console.log(this.drag(position));
+    console.log("weight", this.weight(mass));
+    console.log("drag", this.drag(position));
+    console.log("thrust", this.thrust(position));
+    console.log("lift", this.lift(position));
     console.log("total forces", this.totalForces(mass, position));
+    console.log("acceleration", acceleration);
+    if (acceleration.z >= 1000) acceleration.z = 1000;
 
-    if (position.y >= 0)
-      this.vilocity.add(acceleration.clone().multiplyScalar(dTime));
+    if (position.y <= 3 && this.totalForces(mass, position).y <= 0)
+      this.vilocity.y = 0;
+    this.vilocity.add(acceleration.clone().multiplyScalar(dTime));
     console.log("vilocity", this.vilocity);
-    position.add(
-      new Vector3(this.vilocity.x * dTime, 0, this.vilocity.z * dTime),
-    );
+    position.add(this.vilocity.clone().multiplyScalar(dTime));
     console.log("position", position);
-    // console.log(this.thrust(position));
   }
 }
