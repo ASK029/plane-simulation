@@ -34,6 +34,16 @@ export default [
     path: "textures/1/black-road-texture-normal.jpg",
   },
   {
+    name: "grassColorTexture",
+    type: "texture",
+    path: "textures/2/grass-texture.jpg",
+  },
+  {
+    name: "grassNormalTexture",
+    type: "texture",
+    path: "textures/2/grass-texture-normal.jpg",
+  },
+  {
     name: "airplaneModel",
     type: "gltfModel",
     path: "models/myAirplane2.glb",
