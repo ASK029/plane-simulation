@@ -99,7 +99,7 @@ export default class Aeroplane {
     this.time.on("tick", () => {
       if (isMoveing) {
         // debugObject.moveForword();
-        this.forces.update(0.009, this.model.position, 1000);
+        this.forces.update(0.009, this.model, 1000);
       }
       // console.log(this.model.position);
       // console.log(this.model.position);

@@ -16,7 +16,6 @@ export default class Floor {
   setGeometry() {
     this.geometry = new THREE.PlaneGeometry(56.16, 37440);
     this.geometry2 = new THREE.PlaneGeometry(40960, 40960);
-    console.log(this.geometry2);
   }
 
   setTexture() {
@@ -55,7 +54,6 @@ export default class Floor {
       map: this.grassTextures.color,
       normalMap: this.grassTextures.normal,
     });
-    console.log(this.material2);
   }
 
   setMesh() {
@@ -63,12 +61,10 @@ export default class Floor {
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh2 = new THREE.Mesh(this.geometry2, this.material2);
     this.mesh2.rotation.x = -Math.PI / 2;
-    console.log(this.mesh2);
     this.mesh.rotation.x = (3 * Math.PI) / 2;
     this.mesh.position.y = -3;
     this.mesh2.position.y = -6;
     this.group.add(this.mesh, this.mesh2);
-    console.log(this.group);
     this.scene.add(this.group);
   }
 }
