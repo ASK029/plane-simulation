@@ -37,74 +37,19 @@ export default class Aeroplane {
   }
 
   setMovement() {
-    // let x = 0,
-    //   y = 0,
-    //   z = 0,
-    //   rotateX = 0,
-    //   rotateY = 0,
-    //   rotateZ = 0;
-    // let speed = 0;
     let isMoveing = false;
-    // const debugObject = {
-    //   moveForword: () => {
-    //     speed += 0.01;
-    //     this.model.translateZ(speed);
 
-    // //     // z = 100;
-    //   },
-    // //   moveSides: (side) => {
-    // //     if (side === "R") {
-    // //       rotateY += -Math.PI / 100;
-    // //       rotateZ += Math.PI / 100;
-    // //     } else if (side === "L") {
-    // //       // x = 100;
-    // //       rotateY += Math.PI / 100;
-    // //       rotateZ += -Math.PI / 100;
-    // //     }
-    // //     this.model.rotateY(rotateY);
-    // //     this.model.rotateZ(rotateZ);
-    // //   },
-    // //   moveUp: () => {
-    // //     rotateX += -Math.PI / 100;
-    // //     this.model.rotateX(rotateX);
-    // //   },
-    // //   moveDown: () => {
-    // //     rotateX += Math.PI / 100;
-    // //     this.model.rotateX(rotateX);
-    // //   },
-    // };
     document.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case " ":
-          isMoveing ? (isMoveing = false) : (isMoveing = true);
-          break;
-        // case "d":
-        //   debugObject.moveSides("R");
-        //   break;
-        // case "a":
-        //   debugObject.moveSides("L");
-        //   break;
-        // case "w":
-        //   debugObject.moveUp();
-        //   break;
-        // case "s":
-        //   debugObject.moveDown();
-        //   break;
-      }
-      console.log(this.model.position);
+      if (event.key == " ")
+        isMoveing ? (isMoveing = false) : (isMoveing = true);
     });
 
     this.forces = new Forces();
-    // this.model.position.y = 100;
     this.time.on("tick", () => {
       if (isMoveing) {
-        // debugObject.moveForword();
         this.forces.update(0.009, this.model, 1000);
       }
-      // console.log(this.model.position);
-      // console.log(this.model.position);
     });
-    // speed = 0.01;
   }
 
   setDebug() {

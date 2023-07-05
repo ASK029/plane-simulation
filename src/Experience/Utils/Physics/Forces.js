@@ -1,16 +1,12 @@
 import { Euler, Vector3 } from "three";
 import AirplaneStatics from "./AirplaneStatics";
 import EnvironmentPhysics from "./EnvironmentPhysics";
-import Experience from "../../Experience";
 
 export default class Forces {
   constructor() {
     this.envPhysics = new EnvironmentPhysics();
     this.statics = new AirplaneStatics();
     this.vilocity = new Vector3(0, 0, 0);
-
-    this.experience = new Experience();
-    this.aeroplane = this.experience.world.aeroplane;
   }
 
   weight(mass) {
@@ -23,16 +19,16 @@ export default class Forces {
 
   drag(position) {
     // D = 1/2 * Cd * rho * A * V^2
-    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let vilocitySquared = this.vilocity.lengthSq();
     let A =
       Math.PI * Math.pow(this.statics.fuselageRadius, 2) +
       this.statics.vWingsArea; // frontal area
     let Cd = this.statics.dragCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
 
-    let dz = -0.5 * Cd * rho * A * vilocitySquared.z * 0.01;
+    let D = -0.5 * Cd * rho * A * vilocitySquared * 0.01;
 
-    return new Vector3(0, 0, dz);
+    return new Vector3(0, 0, D);
   }
 
   thrust(position) {
@@ -60,43 +56,43 @@ export default class Forces {
   }
 
   frontLift(position) {
-    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let vilocitySquared = this.vilocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared.length() * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
 
     return new Vector3(0, dy, 0);
   }
 
   tailLift(position) {
-    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let vilocitySquared = this.vilocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared.length() * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
 
     return new Vector3(0, dy, 0);
   }
 
   rightLift(position) {
-    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let vilocitySquared = this.vilocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared.length() * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
 
     return new Vector3(0, dy, 0);
   }
 
   leftLift(position) {
-    let vilocitySquared = this.vilocity.clone().multiply(this.vilocity);
+    let vilocitySquared = this.vilocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared.length() * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
 
     return new Vector3(0, dy, 0);
   }
@@ -122,28 +118,28 @@ export default class Forces {
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "d":
-          airplane.rotation.y = Math.PI * 0.001;
+          airplane.rotation.z += Math.PI * 0.0001;
           break;
         case "a":
-          airplane.rotation.y = -Math.PI * 0.001;
+          airplane.rotation.z += -Math.PI * 0.0001;
           break;
       }
     });
-    return airplane.rotation.y;
+    return airplane.rotation.z;
   }
 
   yaw(airplane) {
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "e":
-          airplane.rotation.z = Math.PI * 0.001;
+          airplane.rotation.y += -Math.PI * 0.0001;
           break;
         case "q":
-          airplane.rotation.z = -Math.PI * 0.001;
+          airplane.rotation.y += Math.PI * 0.0001;
           break;
       }
     });
-    return airplane.rotation.z;
+    return airplane.rotation.y;
   }
 
   euler(airplane, mass) {
@@ -153,12 +149,12 @@ export default class Forces {
       this.pitch(airplane, mass),
       this.yaw(airplane),
       this.roll(airplane),
-      "XZY",
+      "XYZ",
     );
 
-    this.drag(airplane.position).setFromEuler(euler);
-    this.lift(airplane.position).setFromEuler(euler);
-    this.thrust(airplane.position).setFromEuler(euler);
+    this.drag(airplane.position).applyEuler(euler);
+    this.lift(airplane.position).applyEuler(euler);
+    this.thrust(airplane.position).applyEuler(euler);
 
     console.log(euler);
 
@@ -166,10 +162,12 @@ export default class Forces {
   }
 
   update(dTime, airplane, mass) {
-    this.euler(airplane, mass);
+    let euler = this.euler(airplane, mass);
     let acceleration = this.totalForces(mass, airplane.position)
       .clone()
       .divideScalar(mass);
+    acceleration.applyEuler(euler);
+    // airplane.position.applyEuler(euler);
     console.log("weight", this.weight(mass));
     console.log("drag", this.drag(airplane.position));
     console.log("thrust", this.thrust(airplane.position));
