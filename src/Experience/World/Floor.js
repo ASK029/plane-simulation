@@ -14,8 +14,8 @@ export default class Floor {
   }
 
   setGeometry() {
-    this.geometry = new THREE.PlaneGeometry(56.16, 37440);
-    this.geometry2 = new THREE.PlaneGeometry(40960, 40960);
+    this.geometry = new THREE.PlaneGeometry(56.16, 3744);
+    this.geometry2 = new THREE.PlaneGeometry(4096, 4096);
   }
 
   setTexture() {
@@ -24,23 +24,23 @@ export default class Floor {
 
     this.roadTextures.color = this.resources.items.roadColorTexture;
     this.roadTextures.color.encoding = THREE.sRGBEncoding;
-    this.roadTextures.color.repeat.set(1, 1000);
+    this.roadTextures.color.repeat.set(1, 100);
     this.roadTextures.color.wrapS = THREE.RepeatWrapping;
     this.roadTextures.color.wrapT = THREE.RepeatWrapping;
 
     this.roadTextures.normal = this.resources.items.roadNormalTexture;
-    this.roadTextures.normal.repeat.set(1, 1000);
+    this.roadTextures.normal.repeat.set(1, 100);
     this.roadTextures.normal.wrapS = THREE.RepeatWrapping;
     this.roadTextures.normal.wrapT = THREE.RepeatWrapping;
 
     this.grassTextures.color = this.resources.items.grassColorTexture;
     this.grassTextures.color.encoding = THREE.sRGBEncoding;
-    this.grassTextures.color.repeat.set(1000, 1000);
+    this.grassTextures.color.repeat.set(100, 100);
     this.grassTextures.color.wrapS = THREE.RepeatWrapping;
     this.grassTextures.color.wrapT = THREE.RepeatWrapping;
 
     this.grassTextures.normal = this.resources.items.grassNormalTexture;
-    this.grassTextures.normal.repeat.set(1000, 1000);
+    this.grassTextures.normal.repeat.set(100, 100);
     this.grassTextures.normal.wrapS = THREE.RepeatWrapping;
     this.grassTextures.normal.wrapT = THREE.RepeatWrapping;
   }

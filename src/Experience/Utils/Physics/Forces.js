@@ -1,20 +1,19 @@
 import { Euler, Vector3 } from "three";
 import AirplaneStatics from "./AirplaneStatics";
 import EnvironmentPhysics from "./EnvironmentPhysics";
+import RotationalMotion from "./RotationalMotion";
 
 export default class Forces {
   constructor() {
     this.envPhysics = new EnvironmentPhysics();
     this.statics = new AirplaneStatics();
     this.vilocity = new Vector3(0, 0, 0);
+    this.acceleration = new Vector3(0, 0, 0);
+    this.rotations = new RotationalMotion();
   }
 
   weight(mass) {
-    return new Vector3(
-      0,
-      -1 * mass * this.envPhysics.gravityAcceleration() * 0.01,
-      0,
-    );
+    return new Vector3(0, -1 * mass * this.envPhysics.gravityAcceleration(), 0);
   }
 
   drag(position) {
@@ -26,7 +25,7 @@ export default class Forces {
     let Cd = this.statics.dragCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
 
-    let D = -0.5 * Cd * rho * A * vilocitySquared * 0.01;
+    let D = -0.5 * Cd * rho * A * vilocitySquared;
 
     return new Vector3(0, 0, D);
   }
@@ -41,90 +40,92 @@ export default class Forces {
     let Pt = this.envPhysics.atm_pressure(position.y);
     let Pe = this.envPhysics.pressure_e(position.y);
     let Ve = Math.sqrt(y * R * Te);
-    let T = mdot * Ve + (Pe - Pt) * Ae * 0.01;
+    if (position.y >= 12496) Ve *= 0.5;
+    let T = mdot * Ve + (Pe - Pt) * Ae;
 
     return new Vector3(0, 0, T);
   }
 
-  lift(position) {
+  lift(position, backNForth, sides) {
     // L = 1/2 * Cl * rho * A * V^2
     return new Vector3()
-      .add(this.frontLift(position))
-      .add(this.tailLift(position))
-      .add(this.rightLift(position))
-      .add(this.leftLift(position));
+      .add(this.frontLift(position, backNForth))
+      .add(this.tailLift(position, -backNForth))
+      .add(this.rightLift(position, sides))
+      .add(this.leftLift(position, -sides));
   }
 
-  frontLift(position) {
+  frontLift(position, scalar) {
     let vilocitySquared = this.vilocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared + scalar;
 
-    return new Vector3(0, dy, 0);
+    return new Vector3(0, dy / 4, 0);
   }
 
-  tailLift(position) {
+  tailLift(position, scalar) {
     let vilocitySquared = this.vilocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared + scalar;
 
-    return new Vector3(0, dy, 0);
+    return new Vector3(0, dy / 4, 0);
   }
 
-  rightLift(position) {
+  rightLift(position, scalar) {
     let vilocitySquared = this.vilocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared + scalar;
 
-    return new Vector3(0, dy, 0);
+    return new Vector3(0, dy / 4, 0);
   }
 
-  leftLift(position) {
+  leftLift(position, scalar) {
     let vilocitySquared = this.vilocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01;
+    let dy = 0.5 * Cl * rho * A * vilocitySquared + scalar;
 
-    return new Vector3(0, dy, 0);
+    return new Vector3(0, dy / 4, 0);
   }
 
-  totalForces(mass, position) {
+  totalForces(mass, position, backNForth, sides) {
     return new Vector3()
       .add(this.weight(mass))
       .add(this.drag(position))
       .add(this.thrust(position))
-      .add(this.lift(position));
+      .add(this.lift(position, backNForth, sides));
   }
 
-  pitch(airplane, mass) {
-    if (this.lift(airplane.position).length() > this.weight(mass).length()) {
-      if (airplane.rotation.x > -Math.PI / 8)
-        airplane.rotation.x =
-          -Math.PI * this.lift(airplane.position).length() * 0.000001;
+  pitch(airplane, mass, backNForth) {
+    if (
+      this.lift(airplane.position, backNForth, 0).length() >
+      this.weight(mass).length()
+    ) {
+      airplane.rotation.x = this.rotations.pitch(
+        this.frontLift(airplane.position, backNForth),
+        this.tailLift(airplane.position, -backNForth),
+        mass,
+      );
     }
     return airplane.rotation.x;
   }
 
-  roll(airplane) {
-    document.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "d":
-          airplane.rotation.z += Math.PI * 0.0001;
-          break;
-        case "a":
-          airplane.rotation.z += -Math.PI * 0.0001;
-          break;
-      }
-    });
+  roll(airplane, mass, sides) {
+    airplane.rotation.z = this.rotations.roll(
+      this.rightLift(airplane.position, sides),
+      this.leftLift(airplane.position, -sides),
+      mass,
+    );
+
     return airplane.rotation.z;
   }
 
@@ -142,48 +143,61 @@ export default class Forces {
     return airplane.rotation.y;
   }
 
-  euler(airplane, mass) {
+  euler(airplane, mass, backNForth, sides) {
     let euler = new Euler();
 
     euler.set(
-      this.pitch(airplane, mass),
+      this.pitch(airplane, mass, backNForth),
       this.yaw(airplane),
-      this.roll(airplane),
+      this.roll(airplane, mass, sides),
       "XYZ",
     );
 
     this.drag(airplane.position).applyEuler(euler);
-    this.lift(airplane.position).applyEuler(euler);
+    this.lift(airplane.position, backNForth, sides).applyEuler(euler);
+    this.frontLift(airplane.position, backNForth).applyEuler(euler);
+    this.tailLift(airplane.position, -backNForth).applyEuler(euler);
+    this.rightLift(airplane.position, sides).applyEuler(euler);
+    this.leftLift(airplane.position, -sides).applyEuler(euler);
     this.thrust(airplane.position).applyEuler(euler);
-
-    console.log(euler);
 
     return euler;
   }
 
-  update(dTime, airplane, mass) {
-    let euler = this.euler(airplane, mass);
-    let acceleration = this.totalForces(mass, airplane.position)
-      .clone()
-      .divideScalar(mass);
-    acceleration.applyEuler(euler);
-    // airplane.position.applyEuler(euler);
-    console.log("weight", this.weight(mass));
-    console.log("drag", this.drag(airplane.position));
-    console.log("thrust", this.thrust(airplane.position));
-    console.log("lift", this.lift(airplane.position));
-    console.log("total forces", this.totalForces(mass, airplane.position));
-    console.log("acceleration", acceleration);
-    if (acceleration.z >= 1000) acceleration.z = 0;
+  // cruise(airplane,)
+
+  update(dTime, airplane, mass, backNForth, sides) {
+    if (airplane.position.y >= 1000) {
+      this.acceleration = new Vector3(0, 0, 0);
+      this.vilocity.y = 0;
+      this.lift(airplane.position, backNForth, sides).copy(
+        this.weight(mass).clone().multiplyScalar(-1),
+      );
+      this.drag(airplane.position).copy(
+        this.thrust(airplane.position).clone().multiplyScalar(-1),
+      );
+    } else {
+      this.acceleration = this.totalForces(
+        mass,
+        airplane.position,
+        backNForth,
+        sides,
+      )
+        .clone()
+        .divideScalar(mass);
+    }
+    this.acceleration.applyEuler(this.euler(airplane, mass, backNForth, sides));
+    console.log("bnf", backNForth);
+    console.log("rotation", airplane.rotation.x);
 
     if (
       airplane.position.y <= 3 &&
-      this.totalForces(mass, airplane.position).y <= 0
+      this.totalForces(mass, airplane.position, backNForth, sides).y <= 0
     )
       this.vilocity.y = 0;
-    this.vilocity.add(acceleration.clone().multiplyScalar(dTime));
-    console.log("vilocity", this.vilocity);
+    if (airplane.position.y <= 3 && backNForth < 5000) this.vilocity.y = 0;
+    console.log("v", this.vilocity);
+    this.vilocity.add(this.acceleration.clone().multiplyScalar(dTime));
     airplane.position.add(this.vilocity.clone().multiplyScalar(dTime));
-    console.log("position", airplane.position);
   }
 }

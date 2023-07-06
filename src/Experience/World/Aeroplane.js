@@ -10,6 +10,7 @@ export default class Aeroplane {
     this.time = this.experience.Time;
     this.resources = this.experience.resources;
     this.camera = this.experience.camera;
+    this.floor = this.experience.world.floor;
     this.physics = new EnvironmentPhysics();
     this.debug = this.experience.debug;
 
@@ -38,23 +39,40 @@ export default class Aeroplane {
 
   setMovement() {
     let isMoveing = false;
+    let backNForth = 0,
+      sides = 0;
 
     document.addEventListener("keydown", (event) => {
-      if (event.key == " ")
-        isMoveing ? (isMoveing = false) : (isMoveing = true);
+      if (event.key == " ") isMoveing = !isMoveing;
+
+      switch (event.key) {
+        case "w":
+          backNForth += 100;
+          break;
+        case "s":
+          backNForth -= 100;
+          break;
+        case "d":
+          sides += 1;
+          break;
+        case "a":
+          sides -= 1;
+          break;
+      }
     });
 
     this.forces = new Forces();
     this.time.on("tick", () => {
       if (isMoveing) {
-        this.forces.update(0.009, this.model, 1000);
+        if (this.model.position.y >= 900) if (backNForth > 0) backNForth -= 50;
+        this.forces.update(0.009, this.model, 10000, backNForth, sides);
+        console.log(this.model.position);
       }
     });
   }
 
   setDebug() {
     if (this.debug.active) {
-      // this.debugFolder.add(debugObject, "moveForword");
       this.debugFolder.add(this.model.position, "x", -50, 50, 0.01);
       this.debugFolder.add(this.model.position, "y", 0, 1000, 0.01);
       this.debugFolder.add(this.model.position, "z", 0, 100, 0.01);
