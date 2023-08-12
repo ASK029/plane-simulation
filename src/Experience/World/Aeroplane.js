@@ -47,16 +47,16 @@ export default class Aeroplane {
 
       switch (event.key) {
         case "w":
-          backNForth += 100;
+          backNForth += 1000;
           break;
         case "s":
-          backNForth -= 100;
+          backNForth -= 1000;
           break;
         case "d":
-          sides += 1;
+          sides += 5;
           break;
         case "a":
-          sides -= 1;
+          sides -= 5;
           break;
       }
     });
@@ -67,7 +67,12 @@ export default class Aeroplane {
         if (this.model.position.y >= 900) if (backNForth > 0) backNForth -= 50;
         this.forces.update(0.009, this.model, 10000, backNForth, sides);
         console.log(this.model.position);
+        this.scene.add(this.forces.forcesArrow);
       }
+      // if (this.model.position.y > 4) {
+      //   this.camera.instance.position.set(20, 0, 0);
+      //   // this.camera.instance.lookAt(this.model.position);
+      // }
     });
   }
 
