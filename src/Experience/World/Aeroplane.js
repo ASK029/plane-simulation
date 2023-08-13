@@ -15,12 +15,13 @@ export default class Aeroplane {
     this.debug = this.experience.debug;
 
     if (this.debug.active) {
-      this.debugFolder = this.debug.ui.addFolder("Airplane");
+      this.debugUI = this.debug.ui;
     }
 
     //setup
     this.resource = this.resources.items.airplaneModel;
     this.model = this.resource.scene;
+    this.model.mass = 10000;
     this.setDebug();
     this.setModel();
   }
@@ -65,22 +66,25 @@ export default class Aeroplane {
     this.time.on("tick", () => {
       if (isMoveing) {
         if (this.model.position.y >= 900) if (backNForth > 0) backNForth -= 50;
-        this.forces.update(0.009, this.model, 10000, backNForth, sides);
+        this.forces.update(
+          0.009,
+          this.model,
+          this.model.mass,
+          backNForth,
+          sides,
+        );
         console.log(this.model.position);
         this.scene.add(this.forces.forcesArrow);
       }
-      // if (this.model.position.y > 4) {
-      //   this.camera.instance.position.set(20, 0, 0);
-      //   // this.camera.instance.lookAt(this.model.position);
-      // }
     });
   }
 
   setDebug() {
     if (this.debug.active) {
-      this.debugFolder.add(this.model.position, "x", -50, 50, 0.01);
-      this.debugFolder.add(this.model.position, "y", 0, 1000, 0.01);
-      this.debugFolder.add(this.model.position, "z", 0, 100, 0.01);
+      this.debugUI.add(this.model.position, "x", -50, 50, 0.01);
+      this.debugUI.add(this.model.position, "y", 0, 1000, 0.01);
+      this.debugUI.add(this.model.position, "z", 0, 100, 0.01);
+      this.debugUI.add(this.model, "mass", 1000, 10000, 0.01);
     }
   }
 }

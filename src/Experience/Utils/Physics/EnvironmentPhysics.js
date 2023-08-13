@@ -2,15 +2,21 @@ import { Vector3 } from "three";
 
 export default class EnvironmentPhysics {
   constructor() {
-    this.earthRedius = 6378139.99; //m
+    this.planetRedius = 6378139.99; // m
     this.gravitationalConstant = 6.6743;
-    this.earthMass = 5.972e13;
+    this.planetMass = 5.972e13; // kg
   }
 
   gravityAcceleration() {
+    console.log(
+      "grvity",
+      (this.gravitationalConstant * this.planetMass) /
+        Math.pow(this.planetRedius, 2),
+    );
+    console.log("mass", Math.pow(this.planetRedius, 2));
     return (
-      (this.gravitationalConstant * this.earthMass) /
-      Math.pow(this.earthRedius, 2)
+      (this.gravitationalConstant * this.planetMass) /
+      Math.pow(this.planetRedius, 2)
     );
   }
 
@@ -23,6 +29,7 @@ export default class EnvironmentPhysics {
     let Lb = -0.0065; // [kelven/m]
     let base = 1 + (Lb / Tb) * height;
     let exponent = -(this.gravityAcceleration() * Md) / (R * Lb);
+    console.log("p", Math.pow(base, exponent));
     return P0 * Math.pow(base, exponent);
   }
 
@@ -43,10 +50,10 @@ export default class EnvironmentPhysics {
   }
 
   //Te
-  temperature_e(height) {
+  temperature_e(height, scalar) {
     let y = 1.4;
     let Tt = this.temperature(height);
-    return Tt / (1 + (y - 1) / 2);
+    return (scalar * Tt) / (1 + (y - 1) / 2);
   }
 
   air_rho(height) {

@@ -14,11 +14,6 @@ export default class RotationalMotion {
   }
 
   roll(rightLift, leftLift, mass) {
-    console.log(
-      "roll",
-      (this.SidesTorque(rightLift) - this.SidesTorque(leftLift)) /
-        (0.5 * mass * Math.pow(this.statics.fuselageRadius, 2)),
-    );
     return (
       (this.SidesTorque(rightLift) - this.SidesTorque(leftLift)) /
       (0.5 * mass * Math.pow(this.statics.fuselageRadius, 2))

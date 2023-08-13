@@ -13,6 +13,15 @@ export default class Forces {
     this.vilocity = new Vector3(0, 0, 0);
     this.acceleration = new Vector3(0, 0, 0);
     this.rotations = new RotationalMotion();
+    this.debug = this.experience.debug;
+
+    if (this.debug.active) {
+      this.debugUI = this.debug.ui;
+    }
+
+    this.isMars = false;
+    this.TeScalar = 1;
+    this.setDebug();
   }
 
   weight(mass) {
@@ -37,18 +46,18 @@ export default class Forces {
     return new Vector3(0, 0, D);
   }
 
-  thrust(position, x = 1) {
+  thrust(position) {
     // T = mdot * Ve + (pe - pt) * Ae
     let Ae = 1; //unknown..
     let y = 1.4;
     let R = 8.3145;
-    let Te = this.envPhysics.temperature_e(position.y);
+    let Te = this.envPhysics.temperature_e(position.y, this.TeScalar);
     let mdot = this.envPhysics.m_dot(position.y);
     let Pt = this.envPhysics.atm_pressure(position.y);
     let Pe = this.envPhysics.pressure_e(position.y);
     let Ve = Math.sqrt(y * R * Te);
     if (position.y >= 12496) Ve *= 0.5;
-    let T = mdot * Ve + (Pe - Pt) * Ae * 0.01 * x;
+    let T = mdot * Ve + (Pe - Pt) * Ae * 0.01;
 
     return new Vector3(0, 0, T);
   }
@@ -109,7 +118,7 @@ export default class Forces {
     return new Vector3()
       .add(this.weight(mass))
       .add(this.drag(position))
-      .add(this.thrust(position, x))
+      .add(this.thrust(position))
       .add(this.lift(position, backNForth, sides, x));
   }
 
@@ -175,11 +184,12 @@ export default class Forces {
   // cruise(airplane,)
 
   update(dTime, airplane, mass, backNForth, sides) {
+    this.mars();
     let x = 1;
     this.euler(airplane, mass, backNForth, sides);
-    if (backNForth < 0) {
-      x = 0;
-    }
+    // if (backNForth < 0) {
+    //   x = 0;
+    // }
     if (airplane.position.y >= 1000) {
       this.acceleration = new Vector3(0, 0, 0);
       this.vilocity.y = 0;
@@ -221,5 +231,17 @@ export default class Forces {
     this.forcesArrow.setRotationFromEuler(
       this.euler(airplane, mass, backNForth, sides),
     );
+  }
+
+  mars() {
+    if (this.isMars) {
+      this.envPhysics.planetRedius = 3390000; // m
+      this.envPhysics.planetMass = 6.42e12; // kg
+    }
+  }
+
+  setDebug() {
+    this.debugUI.add(this, "isMars");
+    this.debugUI.add(this, "TeScalar", 0.1, 10, 0.01);
   }
 }
