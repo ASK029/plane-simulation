@@ -8,12 +8,6 @@ export default class EnvironmentPhysics {
   }
 
   gravityAcceleration() {
-    console.log(
-      "grvity",
-      (this.gravitationalConstant * this.planetMass) /
-        Math.pow(this.planetRedius, 2),
-    );
-    console.log("mass", Math.pow(this.planetRedius, 2));
     return (
       (this.gravitationalConstant * this.planetMass) /
       Math.pow(this.planetRedius, 2)
@@ -29,7 +23,6 @@ export default class EnvironmentPhysics {
     let Lb = -0.0065; // [kelven/m]
     let base = 1 + (Lb / Tb) * height;
     let exponent = -(this.gravityAcceleration() * Md) / (R * Lb);
-    console.log("p", Math.pow(base, exponent));
     return P0 * Math.pow(base, exponent);
   }
 

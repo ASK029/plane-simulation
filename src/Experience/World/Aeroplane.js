@@ -13,6 +13,7 @@ export default class Aeroplane {
     this.floor = this.experience.world.floor;
     this.physics = new EnvironmentPhysics();
     this.debug = this.experience.debug;
+    this.deltaTime = 0.009;
 
     if (this.debug.active) {
       this.debugUI = this.debug.ui;
@@ -43,6 +44,8 @@ export default class Aeroplane {
     let backNForth = 0,
       sides = 0;
 
+    this.forces = new Forces();
+
     document.addEventListener("keydown", (event) => {
       if (event.key == " ") isMoveing = !isMoveing;
 
@@ -51,7 +54,7 @@ export default class Aeroplane {
           backNForth += 1000;
           break;
         case "s":
-          backNForth -= 1000;
+          if (this.forces.isLanding) backNForth -= 1000;
           break;
         case "d":
           sides += 5;
@@ -62,18 +65,17 @@ export default class Aeroplane {
       }
     });
 
-    this.forces = new Forces();
     this.time.on("tick", () => {
       if (isMoveing) {
-        if (this.model.position.y >= 900) if (backNForth > 0) backNForth -= 50;
+        if (this.model.position.y <= 50 && backNForth < -10) backNForth += 100;
+        if (this.model.position.y >= 900 && backNForth > 0) backNForth -= 50;
         this.forces.update(
-          0.009,
+          this.deltaTime,
           this.model,
           this.model.mass,
           backNForth,
           sides,
         );
-        console.log(this.model.position);
         this.scene.add(this.forces.forcesArrow);
       }
     });
@@ -81,10 +83,8 @@ export default class Aeroplane {
 
   setDebug() {
     if (this.debug.active) {
-      this.debugUI.add(this.model.position, "x", -50, 50, 0.01);
-      this.debugUI.add(this.model.position, "y", 0, 1000, 0.01);
-      this.debugUI.add(this.model.position, "z", 0, 100, 0.01);
-      this.debugUI.add(this.model, "mass", 1000, 10000, 0.01);
+      this.debugUI.add(this.model, "mass", 1000, 1000000, 0.01);
+      this.debugUI.add(this, "deltaTime", 0.0001, 0.1, 0.00001);
     }
   }
 }

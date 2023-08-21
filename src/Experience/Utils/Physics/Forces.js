@@ -10,7 +10,7 @@ export default class Forces {
     this.scene = this.experience.scene;
     this.envPhysics = new EnvironmentPhysics();
     this.statics = new AirplaneStatics();
-    this.vilocity = new Vector3(0, 0, 0);
+    this.velocity = new Vector3(0, 0, 0);
     this.acceleration = new Vector3(0, 0, 0);
     this.rotations = new RotationalMotion();
     this.debug = this.experience.debug;
@@ -21,6 +21,7 @@ export default class Forces {
 
     this.isMars = false;
     this.TeScalar = 1;
+    this.isLanding = false;
     this.setDebug();
   }
 
@@ -34,19 +35,19 @@ export default class Forces {
 
   drag(position) {
     // D = 1/2 * Cd * rho * A * V^2
-    let vilocitySquared = this.vilocity.lengthSq();
+    let velocitySquared = this.velocity.lengthSq();
     let A =
       Math.PI * Math.pow(this.statics.fuselageRadius, 2) +
       this.statics.vWingsArea; // frontal area
     let Cd = this.statics.dragCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
 
-    let D = -0.5 * Cd * rho * A * vilocitySquared * 0.01;
+    let D = -0.5 * Cd * rho * A * velocitySquared * 0.01;
 
     return new Vector3(0, 0, D);
   }
 
-  thrust(position) {
+  thrust(position, x = 1) {
     // T = mdot * Ve + (pe - pt) * Ae
     let Ae = 1; //unknown..
     let y = 1.4;
@@ -57,7 +58,7 @@ export default class Forces {
     let Pe = this.envPhysics.pressure_e(position.y);
     let Ve = Math.sqrt(y * R * Te);
     if (position.y >= 12496) Ve *= 0.5;
-    let T = mdot * Ve + (Pe - Pt) * Ae * 0.01;
+    let T = mdot * Ve + (Pe - Pt) * Ae * 0.01 * x;
 
     return new Vector3(0, 0, T);
   }
@@ -73,43 +74,43 @@ export default class Forces {
   }
 
   frontLift(position, scalar) {
-    let vilocitySquared = this.vilocity.lengthSq();
+    let velocitySquared = this.velocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01 + scalar;
+    let dy = 0.5 * Cl * rho * A * velocitySquared * 0.01 + scalar;
 
     return new Vector3(0, dy / 4, 0);
   }
 
   tailLift(position, scalar) {
-    let vilocitySquared = this.vilocity.lengthSq();
+    let velocitySquared = this.velocity.lengthSq();
     let A =
       (Math.PI * this.statics.fuselageRadius * this.statics.fuselageLength) / 2;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01 + scalar;
+    let dy = 0.5 * Cl * rho * A * velocitySquared * 0.01 + scalar;
 
     return new Vector3(0, dy / 4, 0);
   }
 
   rightLift(position, scalar) {
-    let vilocitySquared = this.vilocity.lengthSq();
+    let velocitySquared = this.velocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01 + scalar;
+    let dy = 0.5 * Cl * rho * A * velocitySquared * 0.01 + scalar;
 
     return new Vector3(0, dy / 4, 0);
   }
 
   leftLift(position, scalar) {
-    let vilocitySquared = this.vilocity.lengthSq();
+    let velocitySquared = this.velocity.lengthSq();
     let A = this.statics.wingArea;
     let Cl = this.statics.liftCoefficient;
     let rho = this.envPhysics.air_rho(position.y - 3);
-    let dy = 0.5 * Cl * rho * A * vilocitySquared * 0.01 + scalar;
+    let dy = 0.5 * Cl * rho * A * velocitySquared * 0.01 + scalar;
 
     return new Vector3(0, dy / 4, 0);
   }
@@ -118,7 +119,7 @@ export default class Forces {
     return new Vector3()
       .add(this.weight(mass))
       .add(this.drag(position))
-      .add(this.thrust(position))
+      .add(this.thrust(position, x))
       .add(this.lift(position, backNForth, sides, x));
   }
 
@@ -181,18 +182,16 @@ export default class Forces {
     return euler;
   }
 
-  // cruise(airplane,)
-
   update(dTime, airplane, mass, backNForth, sides) {
     this.mars();
     let x = 1;
     this.euler(airplane, mass, backNForth, sides);
-    // if (backNForth < 0) {
-    //   x = 0;
-    // }
-    if (airplane.position.y >= 1000) {
+    if (backNForth <= 0 && this.isLanding) {
+      x = 0;
+    }
+    if (airplane.position.y >= 1100 && backNForth >= 0) {
       this.acceleration = new Vector3(0, 0, 0);
-      this.vilocity.y = 0;
+      this.velocity.y = 0;
       this.lift(airplane.position, backNForth, sides).copy(
         this.weight(mass).clone().multiplyScalar(-1),
       );
@@ -216,11 +215,10 @@ export default class Forces {
       airplane.position.y <= 3 &&
       this.totalForces(mass, airplane.position, backNForth, sides, x).y <= 0
     )
-      this.vilocity.y = 0;
-    if (airplane.position.y <= 3 && backNForth < 5000) this.vilocity.y = 0;
-    console.log("v", this.vilocity);
-    this.vilocity.add(this.acceleration.clone().multiplyScalar(dTime));
-    airplane.position.add(this.vilocity.clone().multiplyScalar(dTime));
+      this.velocity.y = 0;
+    if (airplane.position.y <= 3 && backNForth < 5000) this.velocity.y = 0;
+    this.velocity.add(this.acceleration.clone().multiplyScalar(dTime));
+    airplane.position.add(this.velocity.clone().multiplyScalar(dTime));
 
     this.forcesArrow = new ArrowHelper(
       this.totalForces(mass, airplane.position, backNForth, sides),
@@ -231,6 +229,14 @@ export default class Forces {
     this.forcesArrow.setRotationFromEuler(
       this.euler(airplane, mass, backNForth, sides),
     );
+
+    console.log(
+      "total Forces",
+      this.totalForces(mass, airplane.position, backNForth, sides, x),
+    );
+    console.log("accelaration", this.acceleration);
+    console.log("velocity", this.velocity);
+    console.log("position", airplane.position);
   }
 
   mars() {
@@ -241,7 +247,10 @@ export default class Forces {
   }
 
   setDebug() {
-    this.debugUI.add(this, "isMars");
-    this.debugUI.add(this, "TeScalar", 0.1, 10, 0.01);
+    if (this.debug.active) {
+      this.debugUI.add(this, "isMars");
+      this.debugUI.add(this, "TeScalar", 0.1, 10, 0.01);
+      this.debugUI.add(this, "isLanding");
+    }
   }
 }

@@ -21,14 +21,6 @@ export default class RotationalMotion {
   }
 
   pitch(frontLift, tailLift, mass) {
-    console.log(
-      "pitch",
-      (this.UpNDownTorque(tailLift) - this.UpNDownTorque(frontLift)) /
-        ((1 / 12) *
-          mass *
-          (3 * Math.pow(this.statics.fuselageRadius, 2) +
-            Math.pow(this.statics.fuselageLength, 2))),
-    );
     return (
       (this.UpNDownTorque(tailLift) - this.UpNDownTorque(frontLift)) /
       ((1 / 12) *
